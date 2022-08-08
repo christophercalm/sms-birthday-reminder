@@ -109,6 +109,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+birthdays.csv
 
 # Spyder project settings
 .spyderproject
