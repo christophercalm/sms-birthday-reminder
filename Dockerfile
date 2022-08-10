@@ -14,5 +14,3 @@ RUN /usr/bin/crontab /etc/cron.d/crontab
 COPY . .
 # run crond as main process of container
 CMD ["cron", "-f"]
-
-#CMD [ "python3", "send-birthday-sms.py"]
