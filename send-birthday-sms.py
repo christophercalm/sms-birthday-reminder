@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-birthdays = { "Christopher": "June 1, 1995", "Test": "July 2, 1998" }
 account_sid = os.getenv("TWILIO_ACCOUNT_SID")
 auth_token = os.getenv("TWILIO_AUTH_TOKEN")
 from_number = os.getenv("TWILIO_FROM_NUMBER")
@@ -25,23 +24,19 @@ def load_birthdays_from_CSV():
         reader = csv.reader(csvfile, delimiter=',', quotechar='|')
         for person in reader:
             people.append({"name": person[0], "birthday": datetime.strptime(person[1], "%m/%d/%Y")})
-        #print(people)
 
 
-def create_birthday_message(name, birthdays):
+def create_birthday_message(birthday_people):
     birthday_message = ""
-    for birthday in birthdays: 
-        if (birthday.year = 1900):
-            birthday_message = birthday_message + f"{name}'s birthday is tomorrow\n"
+    for person in birthday_people: 
+        birthday = person.get("birthday")
+        if (birthday.year == default_year):
+            birthday_message = birthday_message + f"{person.get('name')}'s birthday is tomorrow\n"
         else:
-            return f"{name}'s birthday is tomorrow and will be {birthday.year - datetime.now().year} years old"
-
-
-
+            birthday_message = birthday_message + f"{person.get('name')}'s birthday is tomorrow and will be {datetime.now().year - birthday.year} years old\n"
+    return birthday_message
 
 def main():
-    # for name, birthday in birthdays.items():
-    #     send_sms(name, birthday)
     load_birthdays_from_CSV()
     birthdays_to_send = []
     for person in people:
@@ -49,15 +44,18 @@ def main():
         birthday_with_current_year = birthday_with_current_year.replace(year = datetime.now().year)
         tomorrow_datetime = datetime.now().replace(hour=0, minute = 0, second = 0, microsecond = 0) + timedelta(days=1)
         day_after_tomorrow_datetime = tomorrow_datetime + timedelta(days=1)
+        birthday_tomorrow = birthday_with_current_year >= tomorrow_datetime and birthday_with_current_year <= day_after_tomorrow_datetime
         if(birthday_with_current_year >= tomorrow_datetime and birthday_with_current_year <= day_after_tomorrow_datetime):
             birthdays_to_send.append(person)
-        if(len(birthdays_to_send) > 0):
-            send_sms(birthdays_to_send)
+    if(len(birthdays_to_send) > 0):
+        birthday_message = create_birthday_message(birthdays_to_send)
+        print(birthday_message)
+        send_sms(birthday_message)
 
-def send_sms(name, birthday):
+def send_sms(message):
     message = client.messages \
         .create(
-            body=f"{name}'s birthday is on {birthday}",
+            body=message,
             from_=from_number,
             to=to_number
         )
