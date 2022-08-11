@@ -1,5 +1,5 @@
 # must be ended with a new line "LF" (Unix) and not "CRLF" (Windows)
-# will run at 6pm every day
-0 18 * * * cd /app && /usr/local/bin/python3 send-birthday-sms.py > /proc/1/fd/1 2>/proc/1/fd/2
+# will run at 6pm (Central = UTC - 5)
+0 23 * * * cd /app && /usr/local/bin/python3 send-birthday-sms.py > /proc/1/fd/1 2>/proc/1/fd/2
 # An empty line is required at the end of this file for a valid cron file.
 

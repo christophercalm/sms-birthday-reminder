@@ -37,6 +37,8 @@ def create_birthday_message(birthday_people):
     return birthday_message
 
 def main():
+    print("Starting birthday SMS script")
+    print("Current Date: " + str(datetime.now()))
     load_birthdays_from_CSV()
     birthdays_to_send = []
     for person in people:
@@ -45,12 +47,14 @@ def main():
         tomorrow_datetime = datetime.now().replace(hour=0, minute = 0, second = 0, microsecond = 0) + timedelta(days=1)
         day_after_tomorrow_datetime = tomorrow_datetime + timedelta(days=1)
         birthday_tomorrow = birthday_with_current_year >= tomorrow_datetime and birthday_with_current_year <= day_after_tomorrow_datetime
-        if(birthday_with_current_year >= tomorrow_datetime and birthday_with_current_year <= day_after_tomorrow_datetime):
+        if(birthday_tomorrow):
             birthdays_to_send.append(person)
     if(len(birthdays_to_send) > 0):
         birthday_message = create_birthday_message(birthdays_to_send)
         print(birthday_message)
         send_sms(birthday_message)
+    else:
+        print("No birthdays to send\n")
 
 def send_sms(message):
     message = client.messages \
