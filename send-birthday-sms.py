@@ -52,7 +52,6 @@ def check_if_birthday_in_window(person, days_in_advance):
     birthday_with_current_year = copy.copy(person["birthday"])
     birthday_with_current_year = birthday_with_current_year.replace(year = datetime.now().year)
     advance_datetime = datetime.now().replace(hour=0, minute = 0, second = 0, microsecond = 0) + timedelta(days=days_in_advance)
-    print(advance_datetime)
     day_after_advance_datetime = advance_datetime + timedelta(days=1)
     return birthday_with_current_year >= advance_datetime and birthday_with_current_year <= day_after_advance_datetime
 
@@ -73,7 +72,7 @@ def main():
         birthday_within_window = check_if_birthday_in_window(person, days_in_advance)
         if(birthday_within_window):
             birthdays_to_send.append(person)
-            
+
     if(len(birthdays_to_send) > 0):
         birthday_message = create_birthday_message(birthdays_to_send)
         print(birthday_message)
