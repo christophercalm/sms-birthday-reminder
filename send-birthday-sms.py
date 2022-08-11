@@ -2,6 +2,7 @@
 import os
 import csv
 import copy
+import sys
 from datetime import timedelta, datetime
 from twilio.rest import Client
 from dotenv import load_dotenv
@@ -36,34 +37,47 @@ def create_birthday_message(birthday_people):
             birthday_message = birthday_message + f"{person.get('name')}'s birthday is tomorrow and will be {datetime.now().year - birthday.year} years old\n"
     return birthday_message
 
-def main():
-    print("Starting birthday SMS script")
-    print("Current Date: " + str(datetime.now()))
-    load_birthdays_from_CSV()
-    birthdays_to_send = []
-    for person in people:
-        birthday_with_current_year = copy.copy(person["birthday"])
-        birthday_with_current_year = birthday_with_current_year.replace(year = datetime.now().year)
-        tomorrow_datetime = datetime.now().replace(hour=0, minute = 0, second = 0, microsecond = 0) + timedelta(days=1)
-        day_after_tomorrow_datetime = tomorrow_datetime + timedelta(days=1)
-        birthday_tomorrow = birthday_with_current_year >= tomorrow_datetime and birthday_with_current_year <= day_after_tomorrow_datetime
-        if(birthday_tomorrow):
-            birthdays_to_send.append(person)
-    if(len(birthdays_to_send) > 0):
-        birthday_message = create_birthday_message(birthdays_to_send)
-        print(birthday_message)
-        send_sms(birthday_message)
-    else:
-        print("No birthdays to send\n")
-
 def send_sms(message):
-    message = client.messages \
+    try: 
+        message = client.messages \
         .create(
             body=message,
             from_=from_number,
             to=to_number
         )
+    except:
+        print("An exception occurred while trying to send message")
 
-    print(message.sid)
+def check_if_birthday_in_window(person, days_in_advance):
+    birthday_with_current_year = copy.copy(person["birthday"])
+    birthday_with_current_year = birthday_with_current_year.replace(year = datetime.now().year)
+    advance_datetime = datetime.now().replace(hour=0, minute = 0, second = 0, microsecond = 0) + timedelta(days=days_in_advance)
+    day_after_advance_datetime = advance_datetime + timedelta(days=1)
+    return birthday_with_current_year >= advance_datetime and birthday_with_current_year <= day_after_advance_datetime
+
+def main():
+    print("Starting birthday SMS script")
+    print("Current Date: " + str(datetime.now()))
+    load_birthdays_from_CSV()
+
+    days_in_advance = 1
+
+    # get arguments from command line
+    command_line_args = sys.argv[1:]
+    if (command_line_args and command_line_args[0].isdigit()):
+        days_in_advance = int(command_line_args[0])
+
+    birthdays_to_send = []
+    for person in people:
+        birthday_within_window = check_if_birthday_in_window(person, days_in_advance)
+        if(birthday_within_window):
+            birthdays_to_send.append(person)
+
+    if(len(birthdays_to_send) > 0):
+        birthday_message = create_birthday_message(birthdays_to_send)
+        print(birthday_message)
+        send_sms(birthday_message)
+    else:
+        print("No birthdays to send\n")    
 
 main()
