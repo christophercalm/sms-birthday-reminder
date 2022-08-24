@@ -27,14 +27,14 @@ def load_birthdays_from_CSV():
             people.append({"name": person[0], "birthday": datetime.strptime(person[1], "%m/%d/%Y")})
 
 
-def create_birthday_message(birthday_people):
+def create_birthday_message(birthday_people, days_in_advance):
     birthday_message = ""
     for person in birthday_people: 
         birthday = person.get("birthday")
         if (birthday.year == default_year):
-            birthday_message = birthday_message + f"{person.get('name')}'s birthday is tomorrow\n"
+            birthday_message = birthday_message + f"{person.get('name')}'s birthday is within {days_in_advance} day(s) \n"
         else:
-            birthday_message = birthday_message + f"{person.get('name')}'s birthday is tomorrow and will be {datetime.now().year - birthday.year} years old\n"
+            birthday_message = birthday_message + f"{person.get('name')}'s birthday is within {days_in_advance} day(s) and will be {datetime.now().year - birthday.year} years old\n"
     return birthday_message
 
 def send_sms(message):
@@ -53,7 +53,7 @@ def check_if_birthday_in_window(person, days_in_advance):
     birthday_with_current_year = birthday_with_current_year.replace(year = datetime.now().year)
     advance_datetime = datetime.now().replace(hour=0, minute = 0, second = 0, microsecond = 0) + timedelta(days=days_in_advance)
     day_after_advance_datetime = advance_datetime + timedelta(days=1)
-    return birthday_with_current_year >= advance_datetime and birthday_with_current_year <= day_after_advance_datetime
+    return birthday_with_current_year >= advance_datetime and birthday_with_current_year < day_after_advance_datetime
 
 def main():
     print("Starting birthday SMS script")
@@ -74,7 +74,7 @@ def main():
             birthdays_to_send.append(person)
 
     if(len(birthdays_to_send) > 0):
-        birthday_message = create_birthday_message(birthdays_to_send)
+        birthday_message = create_birthday_message(birthdays_to_send, days_in_advance)
         print(birthday_message)
         send_sms(birthday_message)
     else:
